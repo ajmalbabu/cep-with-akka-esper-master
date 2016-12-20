@@ -1,0 +1,13 @@
+---
+server:
+  address: localhost
+  port: 8082
+akka:
+  number.of.shards: 10
+management:
+  port: 8083
+cassandra:
+  contactPoints: 127.0.0.1
+  port: 9042
+kafka:
+  bootstrap.servers: localhost:9092

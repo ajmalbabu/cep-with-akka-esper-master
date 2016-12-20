@@ -1,0 +1,44 @@
+-- Flight
+
+drop table flight;
+
+truncate flight;
+
+create table flight (
+  flightInfo varchar primary key,
+  carrierCode varchar,
+  flightNumber int,
+  flightDate timestamp,
+  departureAirport varchar,
+  arrivalAirport varchar,
+  departureTime timestamp,
+  arrivalTime timestamp,
+  confirmationNumbers Set<varchar>,
+  aircraftTailNumber varchar
+);
+
+
+insert into flight (flightInfo , carrierCode,flightNumber, flightDate, departureAirport,arrivalAirport,departureTime,arrivalTime, aircraftTailNumber  )
+values ('WN-101-2016:01:01-MSP-DAL','WN', 101, '2016-01-01','MSP' ,'DAL', '2016-01-01 09:00:00', '2016-01-01 12:00:00', 'AC1');
+
+insert into flight (flightInfo , carrierCode,flightNumber, flightDate, departureAirport,arrivalAirport,departureTime,arrivalTime,confirmationNumbers, aircraftTailNumber  )
+values ('WN-101-2016:01:01-MSP-DAL','WN', 101, '2016-01-01','MSP' ,'DAL', '2016-01-01 09:00:00', '2016-01-01 12:00:00',{'CZ67YT'}, 'AC1');
+
+-- List example below.
+update flight set confirmationNumbers = confirmationNumbers + ['GH59T5'] where flightInfo = 'WN-101-2016:01:01-MSP-DAL';
+
+select * from flight;
+
+create table pnr (
+  confirmationNumber varchar primary key,
+  firstName varchar,
+  lastName varchar,
+  flightKeys Set<varchar>
+);
+
+
+select * from pnr;
+
+
+update flight set confirmationnumbers =  [] where flightkey = 'WN-200-2016-00-01-DAL-MSP';
+update flight set confirmationnumbers =  confirmationnumbers + ['ZB123F'] where flightkey = 'WN-200-2016-00-01-DAL-MSP';

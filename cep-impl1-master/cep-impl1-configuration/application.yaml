@@ -1,0 +1,93 @@
+---
+# CEP specific configuration
+cep:
+  akka:
+    config.file.name: cep.akka.conf
+    actor.system.name: CepActorSystem
+    cluster.shards.config:
+      clusterShardList:
+        # Showcase how to generate anomaly via actor.
+        -
+          shardRegionName: FlightDelayPaxImpactSR
+          shardActorClass: com.cep.service.anomaly.akka.FlightDelayPaxImpactAnomalyDetector
+          parameters:
+            anomaly.publisher.bean: consoleAnomalyPublisher
+            anomaly.trigger.time.secs: 10
+            actor.TTL.minutes: 180
+            actor.state.message.expiry.minutes: 90
+        # Showcase how to generate anomaly via esper engine.
+        -
+          shardRegionName: FreqFlightDelaySR
+          shardActorClass: com.cep.service.anomaly.esper1.FrequentFlightDelayAnomalyDetector
+          parameters:
+            anomaly.publisher.bean: consoleAnomalyPublisher
+            frequent.flight.delay.anomaly.check.window.millis: 3000
+            frequent.flight.delay.count.threshold.for.anomaly.generation: 6
+            actor.TTL.minutes: 180
+            actor.state.message.expiry.minutes: 90
+        # Showcase how to generate anomaly via esper engine for multiple stream of events.
+        -
+          shardRegionName: FltDelayWithMaintSR
+          shardActorClass: com.cep.service.anomaly.esper2.FltDelayWithMaintAnomalyDetector
+          parameters:
+            anomaly.publisher.bean: consoleAnomalyPublisher
+# Other configurations follow
+server:
+  context-path: /cep-api
+management:
+  context-path: /actuator
+spring.output.ansi.enabled: ALWAYS
+cassandra:
+  keySpace: cep
+kafka:
+  shutDownHook: false
+  flight.event:
+    topic: flightEventTopic
+    partition: 0
+    pollIntervalMs: 100
+    producerConfig:
+      acks: all
+      retries: 0
+      # This property controls how much bytes the sender would wait to batch up the content before publishing to Kafka.
+      batch.size: 10
+      linger.ms: 1
+      key.serializer: org.apache.kafka.common.serialization.StringSerializer
+      value.serializer: com.cep.service.util.CustomSerializer
+    consumerConfig:
+      group.id: groupFlight
+      # Set this property for auto commit to happen.
+      enable.auto.commit: true
+      # Auto commit interval is an important property, kafka would commit offset at this interval.
+      auto.commit.interval.ms: 101
+      # This is how to control number of records being read in each poll
+      max.partition.fetch.bytes: 1048576
+      heartbeat.interval.ms: 3000
+      session.timeout.ms: 6000
+      key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value.deserializer: com.cep.service.util.CustomSerializer
+      client.key: flightConsumer0
+  passenger.on.flight.event:
+    topic: passengerOnFlightEventTopic
+    partition: 0
+    pollIntervalMs: 100
+    producerConfig:
+      acks: all
+      retries: 0
+      # This property controls how much bytes the sender would wait to batch up the content before publishing to Kafka.
+      batch.size: 10
+      linger.ms: 1
+      key.serializer: org.apache.kafka.common.serialization.StringSerializer
+      value.serializer: com.cep.service.util.CustomSerializer
+    consumerConfig:
+      group.id: groupPassengerOnFlight
+      # Set this property for auto commit to happen.
+      enable.auto.commit: true
+      # Auto commit interval is an important property, kafka would commit offset at this interval.
+      auto.commit.interval.ms: 101
+      # This is how to control number of records being read in each poll
+      max.partition.fetch.bytes: 1048576
+      heartbeat.interval.ms: 3000
+      session.timeout.ms: 6000
+      key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value.deserializer: com.cep.service.util.CustomSerializer
+      client.key: passengerOnFlightConsumer0

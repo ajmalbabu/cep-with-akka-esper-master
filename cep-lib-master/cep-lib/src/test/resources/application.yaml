@@ -1,0 +1,27 @@
+---
+spring.profiles.active: isolate,test
+cep:
+  akka:
+    #  Make sure this is equivalent to number of nodes in AKKA cluster times 10.
+    number.of.shards: 10
+    config.file.name: cep.lib.akka.conf
+    actor.system.name: CepActorSystem
+    cluster.shards.config:
+      clusterShardList:
+        -
+          shardRegionName: SampleShardRegion
+          shardActorClass: com.cep.lib.service.SampleAnomalyDetector
+          parameters:
+            anomaly.publisher.bean: observableAnomalyPublisher
+            anomaly.trigger.time.secs: 1
+        -
+          shardRegionName: MessageExpiryShardRegion
+          shardActorClass: com.cep.lib.service.MessageExpiryDetector
+          parameters:
+            actor.state.message.expiry.millis: 200
+        -
+          shardRegionName: ActorRemovalShardRegion
+          shardActorClass: com.cep.lib.service.ActorRemovalDetector
+          parameters:
+            actor.state.message.expiry.millis: 10000
+            actor.TTL.seconds: 2
